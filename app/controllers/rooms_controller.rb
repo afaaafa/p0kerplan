@@ -1,5 +1,6 @@
 class RoomsController < ApplicationController
-  before_action :set_room, only: %i[ show edit update destroy ]
+  before_action :set_room, only: %i[ show destroy ]
+  before_action :set_participant, only: %i[ show  ]
 
   # GET /rooms or /rooms.json
   def index
@@ -8,6 +9,7 @@ class RoomsController < ApplicationController
 
   # GET /rooms/1 or /rooms/1.json
   def show
+    @is_room_admin = (session[:admin_token] == @room.admin_token)
   end
 
   # GET /rooms/new
@@ -22,15 +24,12 @@ class RoomsController < ApplicationController
   # POST /rooms or /rooms.json
   def create
     @room = Room.new(room_params)
-
-    respond_to do |format|
-      if @room.save
-        format.html { redirect_to @room, notice: "Room was successfully created." }
-        format.json { render :show, status: :created, location: @room }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @room.errors, status: :unprocessable_entity }
-      end
+    if @room.save
+      session[:admin_token] = @room.admin_token
+      session[:participant_name] = params[:participant_name]
+      redirect_to @room, notice: "Sala criada com sucesso!"
+    else
+      render :new
     end
   end
 
@@ -60,11 +59,15 @@ class RoomsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_room
-      @room = Room.find(params.expect(:id))
+      @room = Room.find_by!(slug: params[:slug])
+    end
+
+    def set_participant
+      session[:participant_id] ||= SecureRandom.hex(16)
     end
 
     # Only allow a list of trusted parameters through.
     def room_params
-      params.expect(room: [ :name, :slug, :admin_token ])
+      params.require(:room).permit(:name, :slug)
     end
 end
