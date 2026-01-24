@@ -1,15 +1,37 @@
 class RoomsController < ApplicationController
-  before_action :set_room, only: %i[ show destroy ]
-  before_action :set_participant, only: %i[ show  ]
+  before_action :set_room, only: %i[ show destroy join identify ]
+  before_action :set_participant, only: %i[ show create join identify ]
+  before_action :set_admin_token, only: %i[ create ]
+  before_action :ensure_participant_name, only: %i[ show ]
 
   # GET /rooms or /rooms.json
   def index
     @rooms = Room.all
   end
 
+  def join
+  end
+
+  def identify
+    if params[:participant_name].present?
+      session[:participant_name] = params[:participant_name]
+
+      redirect_to @room
+    else
+      flash[:alert] = "Please, type your name."
+      render :join
+    end
+  end
+
   # GET /rooms/1 or /rooms/1.json
   def show
     @is_room_admin = (session[:admin_token] == @room.admin_token)
+    @current_participant =
+      @room.participants.find_or_create_by!(
+          session_id: session[:participant_id]
+      ) do |p|
+        p.name = session[:participant_name]
+      end
   end
 
   # GET /rooms/new
@@ -26,28 +48,15 @@ class RoomsController < ApplicationController
     @room = Room.new(room_params)
     if @room.save
       session[:admin_token] = @room.admin_token
-      session[:participant_name] = params[:participant_name]
-      redirect_to @room, notice: "Sala criada com sucesso!"
+      redirect_to join_room_path(@room), notice: "Room created! Now, tell us your name."
     else
-      render :new
-    end
-  end
-
-  # PATCH/PUT /rooms/1 or /rooms/1.json
-  def update
-    respond_to do |format|
-      if @room.update(room_params)
-        format.html { redirect_to @room, notice: "Room was successfully updated.", status: :see_other }
-        format.json { render :show, status: :ok, location: @room }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @room.errors, status: :unprocessable_entity }
-      end
+      render :new, status: :unprocessable_entity
     end
   end
 
   # DELETE /rooms/1 or /rooms/1.json
   def destroy
+    return unless room_admin?
     @room.destroy!
 
     respond_to do |format|
@@ -64,6 +73,20 @@ class RoomsController < ApplicationController
 
     def set_participant
       session[:participant_id] ||= SecureRandom.hex(16)
+    end
+
+    def set_admin_token
+      session[:admin_token] ||= SecureRandom.hex(16)
+    end
+
+    def ensure_participant_name
+      if session[:participant_name].blank?
+        redirect_to join_room_path(@room.slug)
+      end
+    end
+
+    def room_admin?
+      session[:admin_token] == @room.admin_token
     end
 
     # Only allow a list of trusted parameters through.

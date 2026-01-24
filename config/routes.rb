@@ -1,7 +1,12 @@
 Rails.application.routes.draw do
   resources :votes
   resources :issues
-  resources :rooms, param: :slug
+  resources :rooms, param: :slug do
+    member do
+      get "join"
+      post "identify"
+    end
+  end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

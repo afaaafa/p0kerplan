@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_22_152316) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_24_012218) do
   create_table "issues", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -19,6 +19,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_152316) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["room_id"], name: "index_issues_on_room_id"
+  end
+
+  create_table "participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.integer "room_id", null: false
+    t.string "session_id"
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_participants_on_room_id"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -41,5 +50,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_22_152316) do
   end
 
   add_foreign_key "issues", "rooms"
+  add_foreign_key "participants", "rooms"
   add_foreign_key "votes", "issues"
 end
