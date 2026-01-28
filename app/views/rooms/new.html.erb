@@ -1,9 +1,27 @@
 <% content_for :title, "New room" %>
 
-<div class="md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">New room</h1>
+<div class="min-h-screen flex flex-col items-center justify-center py-12">
+  
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="font-bold text-4xl text-center mb-2">Create a new Room</h1>
+      <p class="text-gray-500">If you do not provide a slug, we will provide one for you </p>
+    </div>
 
-  <%= render "form", room: @room %>
+    <div class="bg-white p-8 border border-gray-200 rounded-xl shadow-sm">
+      <% if notice.present? %>
+        <div class="w-full max-w-md mb-4">
+          <p class="py-3 px-4 bg-green-50 text-green-600 font-medium rounded-xl border border-green-100 text-center" id="notice">
+          <%= notice %>
+        </p>
+      </div>
+      <% end %>
+      <%= render "form", room: @room %>
+    </div>
 
-  <%= link_to "Back to rooms", rooms_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+    <div class="text-center mt-6">
+      <%= link_to "Back to rooms", rooms_path, class: "text-gray-500 hover:underline" %>
+    </div>
+  </div>
+
 </div>

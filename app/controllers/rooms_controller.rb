@@ -1,5 +1,5 @@
 class RoomsController < ApplicationController
-  before_action :set_room, only: %i[ show destroy join identify ]
+  before_action :set_room, only: %i[ show destroy join identify updated_data ]
   before_action :set_participant, only: %i[ show create join identify ]
   before_action :set_admin_token, only: %i[ create ]
   before_action :ensure_participant_name, only: %i[ show ]
@@ -21,6 +21,12 @@ class RoomsController < ApplicationController
       flash[:alert] = "Please, type your name."
       render :join
     end
+  end
+
+  def check_slug
+    @room = Room.find_by(slug: params[:slug])
+
+    render json: { available: @room.blank? }
   end
 
   # GET /rooms/1 or /rooms/1.json

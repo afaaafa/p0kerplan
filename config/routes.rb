@@ -5,6 +5,11 @@ Rails.application.routes.draw do
     member do
       get "join"
       post "identify"
+      post "updated_data"
+    end
+
+    collection do
+      get "check_slug"
     end
   end
 
